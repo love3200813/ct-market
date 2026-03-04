@@ -1,249 +1,57 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C&T 生活小物市集 | 拾起生活的溫度</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root { 
-            --bg-color: #FFF9F5;       /* 溫暖底色 */
-            --primary-color: #FF6B6B;  /* 熱情珊瑚紅 */
-            --text-color: #4A3728; 
-            --accent-color: #FF9E7D;   /* 暖橘點綴 */
-            --white: #ffffff; 
-            --gray: #f0f0f0; 
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    
+    // ================= 設定區 (請務必填入您的資訊) =================
+    var CHANNEL_ACCESS_TOKEN = "O0kLxlK2XQqBFU3WgsaSkfRSFeqqMFzYRWkgKbp2rpSmFCke08hiLm/4yHSRJc/7HH2wSvU3ayT4ElTUg1HGJl4Ka5E3ZswkgM5mNjGW3h8EaLKhyNSJUAddZ0cMLBapkfKuZE+iq8krSxQxa0I5XgdB04t89/1O/w1cDnyilFU=";
+    var ADMIN_USER_ID = "Uc698a5b3234af9074a880d1f5be78d13"; 
+    // ==========================================================
+
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    // 寫入順序：日期, 姓名, 電話, LINE ID, 品項, 總金額, 地址
+    sheet.appendRow([
+      new Date(), 
+      data.customerName, 
+      data.customerPhone, 
+      data.customerLine, 
+      data.items, 
+      data.totalAmount, 
+      data.address
+    ]);
+
+    var url = "https://api.line.me/v2/bot/message/push";
+    var payload = {
+      "to": ADMIN_USER_ID,
+      "messages": [
+        {
+          "type": "text",
+          "text": "🔥 【新訂單通知】 🔥\n" +
+                  "━━━━━━━━━━━━━━\n" +
+                  "👤 客人：" + data.customerName + "\n" +
+                  "📞 電話：" + data.customerPhone + "\n" +
+                  "📍 地址：" + data.address + "\n" +
+                  "💬 LINE：" + data.customerLine + "\n" +
+                  "📦 品項：" + data.items + "\n" +
+                  "💰 總額：NT$ " + data.totalAmount + "\n" +              
+                  "━━━━━━━━━━━━━━"
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: "PingFang TC", sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
-        
-        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 8%; background: rgba(255, 255, 255, 0.9); position: fixed; width: 100%; z-index: 1000; backdrop-filter: blur(8px); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .logo { font-size: 1.8rem; font-weight: bold; letter-spacing: 4px; color: var(--primary-color); text-decoration: none; cursor: pointer; }
-        .cart-icon { position: relative; cursor: pointer; font-size: 1.4rem; padding: 10px; }
-        .cart-count { position: absolute; top: 0; right: 0; background: var(--primary-color); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; display: flex; align-items: center; justify-content: center; }
-        
-        #cartSidebar { position: fixed; right: -350px; top: 0; width: 320px; height: 100%; background: var(--white); z-index: 2000; transition: 0.4s; box-shadow: -5px 0 15px rgba(0,0,0,0.1); padding: 30px; overflow-y: auto; }
-        #cartSidebar.active { right: 0; }
-        .close-cart { cursor: pointer; display: block; text-align: right; margin-bottom: 20px; }
-        
-        .item-row { border-bottom: 1px solid #eee; padding: 15px 0; }
-        .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .delete-btn { color: #ccc; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
-        .delete-btn:hover { color: #e74c3c; }
-        .qty-controls { display: flex; align-items: center; gap: 10px; }
-        .qty-btn { background: #eee; border: none; width: 24px; height: 24px; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        
-        #main-site, #checkout-site { transition: 0.5s; }
-        #checkout-site { display: none; padding-top: 100px; padding-bottom: 50px; }
-        
-        .hero { height: 60vh; background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1600&q=80'); background-size: cover; background-position: center; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
-        .hero h1 { font-size: 2.8rem; letter-spacing: 8px; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 60px 8%; }
-        .product-card { background: white; border-radius: 12px; overflow: hidden; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.03); border: 1px solid #eee; }
-        .product-img { width: 100%; height: 300px; background-size: cover; background-position: center; }
-        .product-info { padding: 20px; }
-        .add-to-cart { width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; font-weight: bold; transition: 0.3s; }
-        .add-to-cart:hover { opacity: 0.8; }
-        
-        .checkout-container { max-width: 600px; margin: auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; outline: none; }
-        input:focus { border-color: var(--primary-color); }
-        .btn-group { display: flex; gap: 10px; margin-top: 25px; }
-        .btn { flex: 1; padding: 14px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; }
-        .btn-next { background: var(--primary-color); color: white; }
-        .btn-back { background: #eee; }
+      ]
+    };
 
-        /* 手機版字體與排版優化 */
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 1.8rem !important; letter-spacing: 4px !important; padding: 0 15px; }
-            .hero p { font-size: 0.9rem !important; }
-            .hero { height: 40vh !important; }
-            .logo { font-size: 1.4rem !important; }
-            .checkout-container { padding: 20px; margin: 10px; }
-        }
-    </style>
-</head>
-<body>
+    var options = {
+      "method": "post",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + CHANNEL_ACCESS_TOKEN
+      },
+      "payload": JSON.stringify(payload),
+      "muteHttpExceptions": true
+    };
 
-    <nav>
-        <div class="logo" onclick="goHome()">C&T</div>
-        <div class="cart-icon" onclick="toggleCart()">
-            <i class="fa-solid fa-basket-shopping"></i>
-            <span class="cart-count" id="cartCount">0</span>
-        </div>
-    </nav>
-
-    <div id="cartSidebar">
-        <span class="close-cart" onclick="toggleCart()"><i class="fa-solid fa-xmark"></i> 關閉清單</span>
-        <h3 style="margin-bottom:20px; border-bottom: 1px solid #eee; padding-bottom:10px;">您的選物</h3>
-        <div id="cartItemsList"></div>
-        <button class="add-to-cart" id="checkoutBtn" style="display:none; margin-top:30px;" onclick="startCheckout()">前往下單確認</button>
-        <p style="font-size: 12px; color: #999; margin-top: 10px; line-height: 1.4;">提示：此網站僅提供下單，峻廷收到後會私訊與您確認付款方式。</p>
-    </div>
-
-    <main id="main-site">
-        <header class="hero">
-            <h1>拾起生活的溫度</h1>
-            <p>在忙碌的隙縫中，給自己一個呼吸的空間</p>
-        </header>
-        <div class="product-grid">
-            <div class="product-card">
-                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?auto=format&fit=crop&w=600&q=80');"></div>
-                <div class="product-info">
-                    <h4>【晨曦森林】手工大豆蠟燭</h4>
-                    <p style="color:var(--primary-color); font-weight:bold;">NT$ 880</p>
-                    <button class="add-to-cart" onclick="addToCart('晨曦森林 蠟燭', 880)">加入購物車</button>
-                </div>
-            </div>
-            <div class="product-card">
-                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80');"></div>
-                <div class="product-info">
-                    <h4>古樸粗陶．手作圓潤馬克杯</h4>
-                    <p style="color:var(--primary-color); font-weight:bold;">NT$ 1,200</p>
-                    <button class="add-to-cart" onclick="addToCart('手作馬克杯', 1200)">加入購物車</button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <section id="checkout-site">
-        <div class="checkout-container">
-            <h4 style="margin-bottom:15px;">訂單確認</h4>
-            <div id="checkoutSummary" style="background:#fafafa; padding:20px; border-radius:8px; margin-bottom:20px;"></div>
-            <div id="userInfoSection">
-                <input type="text" id="custName" placeholder="收件人姓名 (必填)">
-                <input type="text" id="custPhone" placeholder="收件人電話 (必填)">
-                <input type="text" id="custLine" placeholder="您的 LINE ID (必填)">
-                <input type="text" id="custAddr" placeholder="配送地址">
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-back" onclick="goHome()">回首頁</button>
-                <button class="btn btn-next" onclick="submitOrder()">確認送出訂單</button>
-            </div>
-        </div>
-    </section>
-
-    <script>
-        let cart = {};
-        
-        // 🛠️ 重要：在此處填入您的 Google Script 網址
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby-7ByDQZIND6YLMReuphPXp8QtBLqza6zQMUDjMJrq1NrdOYVrYRr8eP_KWTI-gBE7Rw/exec"; 
-
-        function toggleCart() { document.getElementById('cartSidebar').classList.toggle('active'); }
-
-        function addToCart(name, price) {
-            if (cart[name]) { cart[name].qty += 1; } else { cart[name] = { price: price, qty: 1 }; }
-            updateUI();
-            if(!document.getElementById('cartSidebar').classList.contains('active')) toggleCart();
-        }
-
-        function deleteItem(name) {
-            delete cart[name];
-            updateUI();
-            if (document.getElementById('checkout-site').style.display === "block") renderSummary();
-        }
-
-        function updateQty(name, change) {
-            if (!cart[name]) return;
-            cart[name].qty += change;
-            if (cart[name].qty <= 0) { delete cart[name]; }
-            updateUI();
-            if (document.getElementById('checkout-site').style.display === "block") renderSummary();
-        }
-
-        function updateUI() {
-            const list = document.getElementById('cartItemsList');
-            const btn = document.getElementById('checkoutBtn');
-            const cartKeys = Object.keys(cart);
-            let totalQty = 0;
-
-            if(cartKeys.length === 0) {
-                list.innerHTML = `<p style="color:#999; text-align:center; margin-top:20px;">清單目前是空的...</p>`;
-                btn.style.display = "none";
-                document.getElementById('cartCount').innerText = 0;
-            } else {
-                let html = "";
-                for (let name in cart) {
-                    totalQty += cart[name].qty;
-                    html += `
-                        <div class="item-row">
-                            <div class="item-header">
-                                <span style="font-weight:bold;">${name}</span>
-                                <i class="fa-solid fa-trash-can delete-btn" onclick="deleteItem('${name}')"></i>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div class="qty-controls">
-                                    <button class="qty-btn" onclick="updateQty('${name}', -1)">-</button>
-                                    <span>${cart[name].qty}</span>
-                                    <button class="qty-btn" onclick="updateQty('${name}', 1)">+</button>
-                                </div>
-                                <span style="color:var(--primary-color);">$${cart[name].price * cart[name].qty}</span>
-                            </div>
-                        </div>`;
-                }
-                list.innerHTML = html;
-                btn.style.display = "block";
-                document.getElementById('cartCount').innerText = totalQty;
-            }
-        }
-
-        function startCheckout() {
-            document.getElementById('main-site').style.display = "none";
-            document.getElementById('checkout-site').style.display = "block";
-            renderSummary();
-            window.scrollTo(0,0);
-        }
-
-        function renderSummary() {
-            let total = 0;
-            let html = "";
-            for (let name in cart) {
-                let subtotal = cart[name].price * cart[name].qty;
-                total += subtotal;
-                html += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${name} x ${cart[name].qty}</span><span>$${subtotal}</span></div>`;
-            }
-            document.getElementById('checkoutSummary').innerHTML = html + `<hr style="margin:10px 0;"><div style="font-weight:bold; display:flex; justify-content:space-between; color:var(--primary-color);"><span>總計</span><span>NT$ ${total}</span></div>`;
-        }
-
-        function submitOrder() {
-            const name = document.getElementById('custName').value;
-            const phone = document.getElementById('custPhone').value;
-            const line = document.getElementById('custLine').value;
-            const addr = document.getElementById('custAddr').value;
-
-            if(!name || !phone || !line) return alert("請填寫姓名、電話與 LINE ID。");
-
-            let itemsStr = "";
-            let total = 0;
-            for (let name in cart) {
-                itemsStr += `${name}(x${cart[name].qty}) `;
-                total += cart[name].price * cart[name].qty;
-            }
-
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                body: JSON.stringify({ 
-                    customerName: name, 
-                    customerPhone: phone, 
-                    customerLine: line,
-                    address: addr, 
-                    items: itemsStr, 
-                    totalAmount: total 
-                })
-            });
-            alert("訂單已預約，感謝您的支持！");
-            cart = {};
-            goHome();
-        }
-
-        function goHome() {
-            document.getElementById('main-site').style.display = "block";
-            document.getElementById('checkout-site').style.display = "none";
-            updateUI();
-            window.scrollTo(0,0);
-        }
-    </script>
-</body>
-</html>
+    UrlFetchApp.fetch(url, options);
+    return ContentService.createTextOutput("Success");
+    
+  } catch(f) {
+    return ContentService.createTextOutput("Error: " + f.message);
+  }
+}
