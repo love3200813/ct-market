@@ -48,6 +48,23 @@
         .btn-next { background: var(--primary-color); color: white; }
         .btn-back { background: #eee; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; outline: none; }
+        /* 新增：手機版字體大小微調 */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 1.8rem !important; /* 電腦版原本是 2.8rem，手機版縮小到 1.8rem */
+        letter-spacing: 4px !important; /* 縮小字間距避免爆行 */
+        padding: 0 15px; /* 增加左右留白 */
+    }
+    .hero p {
+        font-size: 0.9rem !important; /* 副標題也稍微縮小 */
+    }
+    .hero {
+        height: 40vh !important; /* 縮小手機版灰色區塊的高度，讓下方商品更快露出來 */
+    }
+    .logo {
+        font-size: 1.4rem !important; /* 縮小左上角店名以免擠到購物車 */
+    }
+}
     </style>
 </head>
 <body>
@@ -223,3 +240,4 @@
 </body>
 
 </html>
+
