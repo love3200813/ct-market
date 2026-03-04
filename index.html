@@ -6,67 +6,43 @@
     <title>C&T 生活小物 | 專業雲端商店</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { 
-            --bg-color: #FFF9F5;       /* 溫暖底色 */
-            --primary-color: #FF6B6B;  /* 熱情珊瑚紅 */
-            --text-color: #4A3728; 
-            --white: #ffffff; 
-        }
+        :root { --bg-color: #FFF9F5; --primary-color: #FF6B6B; --text-color: #4A3728; --white: #ffffff; }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: "PingFang TC", sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
         
-        /* 導覽列：保持簡潔，標題已移出 */
-        nav { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 0 5%; background: rgba(255,255,255,0.95); 
-            position: fixed; width: 100%; z-index: 1000; height: 60px; 
-            backdrop-filter: blur(10px); box-shadow: 0 1px 10px rgba(0,0,0,0.05); 
-        }
-        .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); letter-spacing: 2px; cursor: pointer; }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 0 5%; background: rgba(255,255,255,0.95); position: fixed; width: 100%; z-index: 1000; height: 60px; backdrop-filter: blur(10px); box-shadow: 0 1px 10px rgba(0,0,0,0.05); }
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); letter-spacing: 2px; }
         .cart-icon { position: relative; cursor: pointer; font-size: 1.2rem; }
         .cart-count { position: absolute; top: -8px; right: -8px; background: var(--primary-color); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
         
-        /* 購物車側邊欄 */
         #cartSidebar { position: fixed; right: -100%; top: 0; width: 85%; max-width: 320px; height: 100%; background: var(--white); z-index: 2000; transition: 0.4s; padding: 25px; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
         #cartSidebar.active { right: 0; }
         
-        /* Hero 區塊：標題搬移至此，隨滾動消失 */
-        .hero { 
-            height: 40vh; 
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=80'); 
-            background-size: cover; background-position: center; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            color: white; text-align: center; margin-top: 60px; padding: 0 20px;
-        }
-        .hero h2 { font-size: 1.2rem; color: #FFD93D; margin-bottom: 10px; letter-spacing: 2px; }
-        .hero h1 { font-size: 2.2rem; letter-spacing: 5px; margin-bottom: 5px; }
+        .hero { height: 35vh; background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=80'); background-size: cover; background-position: center; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; margin-top: 60px; }
         
-        /* 商品網格 */
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 20px 4%; }
-        .product-card { background: white; border-radius: 10px; overflow: hidden; border: 1px solid #f0f0f0; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .product-card { background: white; border-radius: 10px; overflow: hidden; border: 1px solid #f0f0f0; display: flex; flex-direction: column; }
         .product-img { width: 100%; aspect-ratio: 1/1; background-size: cover; background-position: center; }
         .product-info { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
-        .btn-main { width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        /* 購物車內控制項 */
+        .cart-item { border-bottom: 1px solid #eee; padding: 15px 0; }
+        .cart-item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .qty-controls { display: flex; align-items: center; gap: 12px; margin-top: 5px; }
+        .qty-btn { background: #f0f0f0; border: none; width: 28px; height: 28px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .delete-btn { color: #ccc; cursor: pointer; font-size: 0.9rem; }
         
-        /* 結帳頁面樣式 */
+        .btn-main { width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         #checkout-site { display: none; padding: 80px 5% 40px; }
-        .checkout-box { max-width:500px; margin:auto; background:white; padding:20px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.05); }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
-        input:focus { border-color: var(--primary-color); }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
 
-        /* 手機版排版優化 */
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 1.6rem !important; }
-            .hero h2 { font-size: 1rem !important; }
-            .logo { font-size: 1.2rem !important; }
-        }
+        @media (min-width: 768px) { .product-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); } }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="logo" onclick="goHome()">C&T 生活小物</div>
+        <div class="logo" onclick="goHome()">C&T生活小物雲端市集下單處</div>
         <div class="cart-icon" onclick="toggleCart()">
             <i class="fa-solid fa-basket-shopping"></i>
             <span class="cart-count" id="cartCount">0</span>
@@ -83,35 +59,32 @@
     </div>
 
     <main id="main-site">
-        <header class="hero">
-            <h2>C&T 生活小物雲端市集下單處</h2> <h1>拾起生活的溫度</h1>
-            <p>在忙碌的隙縫中，給自己一個呼吸的空間</p>
-        </header>
-        <div class="product-grid" id="productGrid">
-            <p style="grid-column:1/-1; text-align:center; padding:40px;">同步中...</p>
-        </div>
+        <header class="hero"><h1>拾起生活的溫度</h1><p>在忙碌的隙縫中，給自己一個呼吸的空間</p></header>
+        <div class="product-grid" id="productGrid"><p style="grid-column:1/-1; text-align:center; padding:40px;">同步中...</p></div>
     </main>
 
     <section id="checkout-site">
-        <div class="checkout-box">
+        <div style="max-width:500px; margin:auto; background:white; padding:20px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.05);">
             <h3 style="text-align:center; margin-bottom:15px;">訂單資料確認</h3>
             <div id="checkoutSummary" style="background:#fafafa; padding:15px; border-radius:8px; margin-bottom:15px;"></div>
             <input type="text" id="custName" placeholder="收件人姓名 (必填)">
             <input type="text" id="custPhone" placeholder="收件人電話 (必填)" inputmode="tel">
-            <input type="text" id="custLine" placeholder="LINE ID (必填)"> <input type="text" id="custAddr" placeholder="配送地址 (必填)">
+            <input type="text" id="custLine" placeholder="LINE ID (必填)">
+            <input type="text" id="custAddr" placeholder="配送地址 (必填)">
             <button class="btn-main" id="submitBtn" onclick="submitOrder()">確認送出訂單</button>
 
-            <div style="font-size: 0.8rem; color: #cc6666; margin-top: 15px; line-height: 1.5; text-align: center; background: #fff5f5; padding: 10px; border-radius: 8px;">
-                <strong>溫馨提醒：</strong><br>
-                此網站僅提供下單，小編收到訂單後會以私訊或電話聯絡與您確認付款方式。
-            </div>
+<p style="font-size: 0.8rem; color: #cc6666; margin-top: 15px; line-height: 1.5; text-align: center; background: #fff5f5; padding: 10px; border-radius: 8px;">
+    <strong>溫馨提醒：</strong><br>
+    此網站僅提供下單，小編收到訂單後會以私訊或電話聯絡與您確認付款方式。
+</p>
 
-            <p onclick="goHome()" style="text-align:center; margin-top:15px; color:#999; cursor:pointer; font-size:0.9rem;">返回修改商品</p>
+<p onclick="goHome()" style="text-align:center; margin-top:15px; color:#999; cursor:pointer; font-size:0.9rem;">返回修改商品</p>
+            
         </div>
     </section>
 
     <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCLFbHaro-lxmYjQevP9L63wFZ5EVHiWHvoU02ZfeTuiK_i9SrQ34m2jr6Cuo4wRdt/exec"; 
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx7UQpiWJpTnDGFsFHxPu_Sltth-hoS-ae3_iOfl8QmTayb3cwXmSETtSm33OPI4okl/exec"; 
         let cart = {};
 
         async function fetchProducts() {
@@ -154,16 +127,13 @@
             for (let name in cart) {
                 totalQty += cart[name].qty;
                 html += `
-                    <div style="border-bottom: 1px solid #eee; padding: 15px 0;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                            <span>${name}</span>
-                            <i class="fa-solid fa-trash-can" style="color:#ccc; cursor:pointer;" onclick="deleteItem('${name}')"></i>
-                        </div>
+                    <div class="cart-item">
+                        <div class="cart-item-header"><span>${name}</span><i class="fa-solid fa-trash-can delete-btn" onclick="deleteItem('${name}')"></i></div>
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div style="display:flex; align-items:center; gap:12px;">
-                                <button style="width:28px; height:28px; border:none; background:#f0f0f0; border-radius:5px;" onclick="updateQty('${name}', -1)">-</button>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="updateQty('${name}', -1)">-</button>
                                 <span>${cart[name].qty}</span>
-                                <button style="width:28px; height:28px; border:none; background:#f0f0f0; border-radius:5px;" onclick="updateQty('${name}', 1)">+</button>
+                                <button class="qty-btn" onclick="updateQty('${name}', 1)">+</button>
                             </div>
                             <span style="font-weight:bold; color:var(--primary-color);">$${cart[name].price * cart[name].qty}</span>
                         </div>
@@ -192,29 +162,18 @@
             const phone = document.getElementById('custPhone').value;
             const line = document.getElementById('custLine').value;
             const addr = document.getElementById('custAddr').value;
-            if(!name || !phone || !line || !addr) return alert("請完整填寫所有資料！");
+            if(!name || !phone || !line || !addr) return alert("請填寫所有資料！");
 
-            const btn = document.getElementById('submitBtn'); btn.innerText = "傳送中..."; btn.disabled = true;
+            const btn = event.target; btn.innerText = "傳送中..."; btn.disabled = true;
 
-            try {
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: "POST", mode: "no-cors",
-                    body: JSON.stringify({ 
-                        customerName: name, 
-                        customerPhone: phone, 
-                        customerLine: line, 
-                        address: addr, 
-                        items: Object.keys(cart).map(k => `${k}(x${cart[k].qty})`).join(', '), 
-                        totalAmount: Object.values(cart).reduce((s,v)=>s+(v.price*v.qty), 0) 
-                    })
-                });
-                alert("訂單已送出！峻廷會儘快聯絡您。");
-                cart = {}; updateUI(); goHome();
-            } catch (e) {
-                alert("傳送失敗，請稍後再試。");
-            } finally {
-                btn.innerText = "確認送出訂單"; btn.disabled = false;
-            }
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST", mode: "no-cors",
+                body: JSON.stringify({ customerName: name, customerPhone: phone, customerLine: line, address: addr, items: Object.keys(cart).map(k => `${k}(x${cart[k].qty})`).join(', '), totalAmount: Object.values(cart).reduce((s,v)=>s+(v.price*v.qty), 0) })
+            });
+            
+            alert("訂單已送出！小編會儘快聯絡您。");
+            cart = {}; updateUI(); goHome();
+            btn.innerText = "確認送出訂單"; btn.disabled = false;
         }
 
         fetchProducts();
