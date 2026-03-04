@@ -19,17 +19,16 @@
             font-family: "PingFang TC", sans-serif; 
             background-color: var(--bg-color); 
             color: var(--text-color);
-            position: relative; /* 讓導覽列可以參考 body 定位 */
+            position: relative;
         }
 
-        /* --- 關鍵修改：導覽列不再漂浮 --- */
+        /* 導覽列：隨網頁捲動消失 */
         nav { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             padding: 0 5%; 
             background: var(--white); 
-            /* 使用 absolute 確保它留在網頁頂端，滑動時會跟著走 */
             position: absolute; 
             top: 0;
             width: 100%; 
@@ -40,7 +39,7 @@
 
         .logo { font-size: 1.1rem; font-weight: bold; color: var(--primary-color); letter-spacing: 1px; cursor: pointer; }
 
-        .cart-icon { position: relative; cursor: pointer; font-size: 1.2rem; color: var(--text-color); }
+        .cart-icon { position: relative; cursor: pointer; font-size: 1.2rem; }
         .cart-count { 
             position: absolute; top: -8px; right: -8px; 
             background: var(--primary-color); color: white; 
@@ -48,17 +47,30 @@
             font-size: 10px; display: flex; align-items: center; justify-content: center; 
         }
 
-        /* 購物車側邊欄：點開時才出現，這部分必須 fixed 才能在點擊後呈現在眼前 */
+        /* 購物車側邊欄 */
         #cartSidebar { 
             position: fixed; right: -100%; top: 0; 
             width: 85%; max-width: 320px; height: 100vh; 
             background: var(--white); z-index: 2000; 
             transition: 0.3s ease-in-out; padding: 25px; 
             overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.1); 
+            display: flex; flex-direction: column;
         }
         #cartSidebar.active { right: 0; }
 
-        /* Hero 區塊：預留 nav 的高度，確保文字不被遮擋 */
+        /* 溫馨提醒樣式 */
+        .notice-box {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #FFF5F5;
+            border-radius: 8px;
+            border: 1px solid #FFE3E3;
+            font-size: 0.85rem;
+            color: #E66767;
+            line-height: 1.6;
+            text-align: center;
+        }
+
         .hero { 
             padding-top: 60px;
             height: 38vh; 
@@ -67,15 +79,12 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             color: white; text-align: center;
         }
-        .hero h1 { font-size: 1.8rem; margin-bottom: 8px; }
 
-        /* 商品區塊 */
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 20px 4%; }
         .product-card { background: white; border-radius: 10px; overflow: hidden; border: 1px solid #eee; display: flex; flex-direction: column; }
         .product-img { width: 100%; aspect-ratio: 1/1; background-size: cover; background-position: center; }
         .product-info { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
 
-        /* 購物車內部樣式 */
         .cart-item { border-bottom: 1px solid #f5f5f5; padding: 15px 0; }
         .qty-controls { display: flex; align-items: center; gap: 12px; margin-top: 5px; }
         .qty-btn { background: #f0f0f0; border: none; width: 30px; height: 30px; border-radius: 5px; cursor: pointer; }
@@ -83,7 +92,7 @@
         .btn-main { width: 100%; padding: 14px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
         
         #checkout-site { display: none; padding: 30px 5%; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; -webkit-appearance: none; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
 
         @media (min-width: 768px) { .product-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } }
     </style>
@@ -103,8 +112,16 @@
             <h3 style="color:var(--text-color)">確認清單</h3>
             <span onclick="toggleCart()" style="cursor:pointer; font-size:1.8rem;">&times;</span>
         </div>
-        <div id="cartItemsList"></div>
-        <button class="btn-main" id="checkoutBtn" style="display:none;" onclick="startCheckout()">前往下單</button>
+        
+        <div id="cartItemsList" style="flex-grow: 1;"></div>
+        
+        <div id="cartFooter" style="display: none;">
+            <button class="btn-main" onclick="startCheckout()">前往下單確認</button>
+            <div class="notice-box">
+                <i class="fa-solid fa-circle-info"></i> <strong>溫馨提醒：</strong><br>
+                此網站僅提供下單，不會要求付款。<br>完成後小編會盡快與您聯絡付款方式。
+            </div>
+        </div>
     </div>
 
     <main id="main-site">
@@ -113,7 +130,7 @@
             <p>簡單小物，點亮你的日常</p>
         </header>
         <div class="product-grid" id="productGrid">
-            <p style="grid-column:1/-1; text-align:center; padding:50px; color:#999;">同步市集商品中...</p>
+            <p style="grid-column:1/-1; text-align:center; padding:50px; color:#999;">商品載入中...</p>
         </div>
     </main>
 
@@ -161,7 +178,7 @@
         function addToCart(name, price) {
             if (cart[name]) { cart[name].qty += 1; } else { cart[name] = { price, qty: 1 }; }
             updateUI();
-            toggleCart(); // 每次點擊自動彈開，讓使用者確認
+            toggleCart();
         }
 
         function updateQty(name, delta) {
@@ -175,6 +192,7 @@
 
         function updateUI() {
             const list = document.getElementById('cartItemsList');
+            const footer = document.getElementById('cartFooter');
             let totalQty = 0; let html = "";
             for (let name in cart) {
                 totalQty += cart[name].qty;
@@ -196,7 +214,7 @@
             }
             list.innerHTML = html || "<p style='color:#ccc; text-align:center; padding:30px;'>購物清單目前空空的喔</p>";
             document.getElementById('cartCount').innerText = totalQty;
-            document.getElementById('checkoutBtn').style.display = totalQty > 0 ? "block" : "none";
+            footer.style.display = totalQty > 0 ? "block" : "none";
         }
 
         function startCheckout() {
@@ -217,10 +235,10 @@
             const phone = document.getElementById('custPhone').value.trim();
             const line = document.getElementById('custLine').value.trim();
             const addr = document.getElementById('custAddr').value.trim();
-            if(!name || !phone || !line || !addr) return alert("請填寫完整的收件資訊！");
+            if(!name || !phone || !line || !addr) return alert("請填寫收件資訊！");
 
             const btn = document.getElementById('submitBtn');
-            btn.innerText = "訂單傳送中..."; btn.disabled = true;
+            btn.innerText = "傳送中..."; btn.disabled = true;
 
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
@@ -237,7 +255,7 @@
                 alert("下單成功！小編會盡快聯絡您～");
                 cart = {}; updateUI(); goHome();
             } catch (e) {
-                alert("傳送出錯，請檢查網路後再試");
+                alert("傳送出錯，請檢查網路");
             } finally {
                 btn.innerText = "確認送出訂單"; btn.disabled = false;
             }
@@ -247,4 +265,3 @@
     </script>
 </body>
 </html>
-
