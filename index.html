@@ -93,7 +93,7 @@
         <span class="close-cart" onclick="toggleCart()"><i class="fa-solid fa-xmark"></i> 關閉</span>
         <h3 style="margin-bottom:20px; color: var(--primary-color);">您的選物清單</h3>
         <div id="cartItemsList"></div>
-        <button class="add-to-cart" id="checkoutBtn" style="display:none; margin-top:30px;" onclick="startCheckout()">前往結帳確認</button>
+        <button class="add-to-cart" id="checkoutBtn" style="display:none; margin-top:30px;" onclick="startCheckout()">前往下單確認</button>
         <p style="font-size: 0.75rem; color: #999; margin-top: 15px; line-height: 1.4;">提示：此網站僅供下單預約，峻廷後續會私訊提供匯款帳號。</p>
     </div>
 
@@ -135,10 +135,10 @@
             <h3 style="margin-bottom:20px; color: var(--primary-color);">訂單資料確認</h3>
             <div id="checkoutSummary" style="background:#fffaf8; padding:20px; border-radius:10px; margin-bottom:20px; border: 1px solid #ffe8e0;"></div>
             <div id="userInfoSection">
-                <input type="text" id="custName" placeholder="收件人姓名 (必填)">
-                <input type="text" id="custPhone" placeholder="收件人電話 (必填)">
-                <input type="text" id="custAddr" placeholder="配送地址">
-            </div>
+    <input type="text" id="custName" placeholder="收件人姓名 (必填)">
+    <input type="text" id="custPhone" placeholder="收件人電話 (必填)">
+    <input type="text" id="custLine" placeholder="LINE ID (必填)"> <input type="text" id="custAddr" placeholder="配送地址">
+</div>
             <div class="btn-group">
                 <button class="btn btn-back" onclick="goHome()">回首頁</button>
                 <button class="btn btn-next" onclick="submitOrder()">確認送出訂單</button>
@@ -260,3 +260,4 @@
     </script>
 </body>
 </html>
+
