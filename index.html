@@ -47,27 +47,46 @@
             font-size: 10px; display: flex; align-items: center; justify-content: center; 
         }
 
-        /* 購物車側邊欄 */
+        /* 購物車側邊欄：改為 Flex 佈局以固定底部 */
         #cartSidebar { 
             position: fixed; right: -100%; top: 0; 
             width: 85%; max-width: 320px; height: 100vh; 
             background: var(--white); z-index: 2000; 
-            transition: 0.3s ease-in-out; padding: 25px; 
-            overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.1); 
-            display: flex; flex-direction: column;
+            transition: 0.3s ease-in-out; 
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1); 
+            display: flex; 
+            flex-direction: column; /* 垂直排列 */
         }
         #cartSidebar.active { right: 0; }
 
+        /* 側邊欄頂部 */
+        .cart-header { padding: 25px 25px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+
+        /* 側邊欄中間商品清單：可捲動 */
+        #cartItemsList { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding: 0 25px;
+        }
+
+        /* 側邊欄底部：固定不動 */
+        .cart-footer { 
+            padding: 20px 25px; 
+            background: #fff; 
+            border-top: 1px solid #eee; 
+            box-shadow: 0 -5px 10px rgba(0,0,0,0.02);
+        }
+
         /* 溫馨提醒樣式 */
         .notice-box {
-            margin-top: 15px;
-            padding: 12px;
+            margin-top: 12px;
+            padding: 10px;
             background-color: #FFF5F5;
             border-radius: 8px;
             border: 1px solid #FFE3E3;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #E66767;
-            line-height: 1.6;
+            line-height: 1.5;
             text-align: center;
         }
 
@@ -100,7 +119,7 @@
 <body>
 
     <nav id="topNav">
-        <div class="logo" onclick="goHome()">C&T生活小物雲端市集下單處</div>
+        <div class="logo" onclick="goHome()">C&T生活小物雲端市集</div>
         <div class="cart-icon" onclick="toggleCart()">
             <i class="fa-solid fa-basket-shopping"></i>
             <span class="cart-count" id="cartCount">0</span>
@@ -108,17 +127,17 @@
     </nav>
 
     <div id="cartSidebar">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div class="cart-header">
             <h3 style="color:var(--text-color)">確認清單</h3>
             <span onclick="toggleCart()" style="cursor:pointer; font-size:1.8rem;">&times;</span>
         </div>
         
-        <div id="cartItemsList" style="flex-grow: 1;"></div>
+        <div id="cartItemsList"></div>
         
-        <div id="cartFooter" style="display: none;">
+        <div id="cartFooterWrap" class="cart-footer" style="display: none;">
             <button class="btn-main" onclick="startCheckout()">前往下單確認</button>
             <div class="notice-box">
-                <i class="fa-solid fa-circle-info"></i> <strong>溫馨提醒：</strong><br>
+                <strong><i class="fa-solid fa-circle-info"></i> 溫馨提醒：</strong><br>
                 此網站僅提供下單，不會要求付款。<br>完成後小編會盡快與您聯絡付款方式。
             </div>
         </div>
@@ -130,7 +149,7 @@
             <p>簡單小物，點亮你的日常</p>
         </header>
         <div class="product-grid" id="productGrid">
-            <p style="grid-column:1/-1; text-align:center; padding:50px; color:#999;">商品載入中...</p>
+            <p style="grid-column:1/-1; text-align:center; padding:50px; color:#999;">商品同步中...</p>
         </div>
     </main>
 
@@ -192,7 +211,7 @@
 
         function updateUI() {
             const list = document.getElementById('cartItemsList');
-            const footer = document.getElementById('cartFooter');
+            const footerWrap = document.getElementById('cartFooterWrap');
             let totalQty = 0; let html = "";
             for (let name in cart) {
                 totalQty += cart[name].qty;
@@ -214,7 +233,7 @@
             }
             list.innerHTML = html || "<p style='color:#ccc; text-align:center; padding:30px;'>購物清單目前空空的喔</p>";
             document.getElementById('cartCount').innerText = totalQty;
-            footer.style.display = totalQty > 0 ? "block" : "none";
+            footerWrap.style.display = totalQty > 0 ? "block" : "none";
         }
 
         function startCheckout() {
@@ -238,7 +257,7 @@
             if(!name || !phone || !line || !addr) return alert("請填寫收件資訊！");
 
             const btn = document.getElementById('submitBtn');
-            btn.innerText = "傳送中..."; btn.disabled = true;
+            btn.innerText = "訂單傳送中..."; btn.disabled = true;
 
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
