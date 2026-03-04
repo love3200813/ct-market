@@ -6,71 +6,83 @@
     <title>C&T 生活小物市集 | 拾起生活的溫度</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --bg-color: #F5F2ED; --primary-color: #2C3E50; --text-color: #4A3728; --accent-color: #D4A373; --white: #ffffff; --gray: #e0e0e0; }
+        :root { 
+            --bg-color: #FFF9F5;       /* 溫暖米白底色 */
+            --primary-color: #FF6B6B;  /* 熱情珊瑚紅 */
+            --text-color: #4A3728;     /* 深咖啡文字 */
+            --accent-color: #FF9E7D;   /* 暖橘點綴 */
+            --white: #ffffff; 
+            --gray: #f0f0f0; 
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: "PingFang TC", sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
-        
+        body { font-family: "PingFang TC", "Noto Sans TC", sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
+
         /* 導覽列 */
-        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 8%; background: rgba(245, 242, 237, 0.95); position: fixed; width: 100%; z-index: 1000; backdrop-filter: blur(8px); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 8%; background: rgba(255, 249, 245, 0.95); position: fixed; width: 100%; z-index: 1000; backdrop-filter: blur(8px); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .logo { font-size: 1.8rem; font-weight: bold; letter-spacing: 4px; color: var(--primary-color); text-decoration: none; cursor: pointer; }
-        .cart-icon { position: relative; cursor: pointer; font-size: 1.4rem; padding: 10px; }
+        .cart-icon { position: relative; cursor: pointer; font-size: 1.4rem; padding: 10px; color: var(--primary-color); }
         .cart-count { position: absolute; top: 0; right: 0; background: var(--accent-color); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; display: flex; align-items: center; justify-content: center; }
-        
+
         /* 購物車側邊欄 */
         #cartSidebar { position: fixed; right: -350px; top: 0; width: 320px; height: 100%; background: var(--white); z-index: 2000; transition: 0.4s; box-shadow: -5px 0 15px rgba(0,0,0,0.1); padding: 30px; overflow-y: auto; }
         #cartSidebar.active { right: 0; }
         .close-cart { cursor: pointer; display: block; text-align: right; margin-bottom: 20px; }
-        
-        /* 數量與刪除控制樣式 */
-        .item-row { border-bottom: 1px solid #eee; padding: 15px 0; }
-        .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .delete-btn { color: #ccc; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
-        .delete-btn:hover { color: #e74c3c; }
-        .qty-controls { display: flex; align-items: center; gap: 10px; }
-        .qty-btn { background: #eee; border: none; width: 24px; height: 24px; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        .qty-btn:hover { background: var(--primary-color); color: white; }
 
-        /* 內容切換與 Hero */
-        #main-site, #checkout-site { transition: 0.5s; }
-        #checkout-site { display: none; padding-top: 100px; padding-bottom: 50px; }
-        .hero { height: 60vh; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1490312278390-ab6414f84c86?auto=format&fit=crop&w=1600&q=80'); background-size: cover; background-position: center; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
-        .hero h1 { font-size: 2.8rem; letter-spacing: 8px; margin-bottom: 10px; }
-        
-        /* 商品與結帳樣式 */
+        /* 購物車控制項 */
+        .item-row { border-bottom: 1px solid #eee; padding: 15px 0; }
+        .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: bold; }
+        .delete-btn { color: #ccc; cursor: pointer; transition: 0.3s; }
+        .delete-btn:hover { color: #ff4757; }
+        .qty-controls { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
+        .qty-btn { background: #f8f8f8; border: 1px solid #ddd; width: 28px; height: 28px; cursor: pointer; border-radius: 4px; }
+        .qty-btn:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+
+        /* Hero 區塊 */
+        .hero { 
+            height: 60vh; 
+            background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1513519245088-0e12902e35ca?auto=format&fit=crop&w=1600&q=80'); 
+            background-size: cover; background-position: center; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; 
+        }
+        .hero h1 { font-size: 2.8rem; letter-spacing: 8px; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .hero p { font-size: 1.1rem; opacity: 0.9; }
+
+        /* 手機版排修補 (RWD) */
+        @media (max-width: 768px) {
+            nav { padding: 10px 5%; }
+            .logo { font-size: 1.4rem; letter-spacing: 2px; }
+            .hero { height: 45vh; }
+            .hero h1 { font-size: 1.8rem; letter-spacing: 3px; padding: 0 10px; line-height: 1.4; }
+            .hero p { font-size: 0.9rem; padding: 0 20px; }
+            .product-grid { padding: 40px 5%; gap: 20px; }
+        }
+
+        /* 商品列表 */
         .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 60px 8%; }
-        .product-card { background: white; border-radius: 12px; overflow: hidden; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.03); border: 1px solid #eee; }
-        .product-img { width: 100%; height: 300px; background-size: cover; background-position: center; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(255, 107, 107, 0.2); }
+        .product-img { width: 100%; height: 280px; background-size: cover; background-position: center; }
         .product-info { padding: 20px; }
-        .add-to-cart { width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; font-weight: bold; }
-        .checkout-container { max-width: 600px; margin: auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .btn-group { display: flex; gap: 10px; margin-top: 25px; }
-        .btn { flex: 1; padding: 14px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; }
+        .product-price { color: var(--primary-color); font-weight: bold; font-size: 1.2rem; margin: 10px 0; }
+        .add-to-cart { width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .add-to-cart:hover { background: #ff5252; letter-spacing: 1px; }
+
+        /* 結帳頁面 */
+        #checkout-site { display: none; padding-top: 100px; padding-bottom: 80px; }
+        .checkout-container { max-width: 550px; margin: auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.08); }
+        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #eee; border-radius: 8px; background: #fafafa; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary-color); background: white; }
+        .btn-group { display: flex; gap: 12px; margin-top: 30px; }
+        .btn { flex: 1; padding: 15px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; }
         .btn-next { background: var(--primary-color); color: white; }
-        .btn-back { background: #eee; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; outline: none; }
-        /* 新增：手機版字體大小微調 */
-@media (max-width: 768px) {
-    .hero h1 {
-        font-size: 1.8rem !important; /* 電腦版原本是 2.8rem，手機版縮小到 1.8rem */
-        letter-spacing: 4px !important; /* 縮小字間距避免爆行 */
-        padding: 0 15px; /* 增加左右留白 */
-    }
-    .hero p {
-        font-size: 0.9rem !important; /* 副標題也稍微縮小 */
-    }
-    .hero {
-        height: 40vh !important; /* 縮小手機版灰色區塊的高度，讓下方商品更快露出來 */
-    }
-    .logo {
-        font-size: 1.4rem !important; /* 縮小左上角店名以免擠到購物車 */
-    }
-}
+        .btn-back { background: #f0f0f0; color: #777; }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="logo" onclick="goHome()">C&T生活小物市集下單區</div>
+        <div class="logo" onclick="goHome()">C&T</div>
         <div class="cart-icon" onclick="toggleCart()">
             <i class="fa-solid fa-basket-shopping"></i>
             <span class="cart-count" id="cartCount">0</span>
@@ -78,10 +90,11 @@
     </nav>
 
     <div id="cartSidebar">
-        <span class="close-cart" onclick="toggleCart()"><i class="fa-solid fa-xmark"></i> 關閉清單</span>
-        <h3 style="margin-bottom:20px; border-bottom: 1px solid #eee; padding-bottom:10px;">您的選物</h3>
+        <span class="close-cart" onclick="toggleCart()"><i class="fa-solid fa-xmark"></i> 關閉</span>
+        <h3 style="margin-bottom:20px; color: var(--primary-color);">您的選物清單</h3>
         <div id="cartItemsList"></div>
-        <button class="add-to-cart" id="checkoutBtn" style="display:none; margin-top:30px;" onclick="startCheckout()">前往下單確認（注意：此網站僅提供下單，不會主動要求付款，峻廷會私訊付款方式）</button>
+        <button class="add-to-cart" id="checkoutBtn" style="display:none; margin-top:30px;" onclick="startCheckout()">前往結帳確認</button>
+        <p style="font-size: 0.75rem; color: #999; margin-top: 15px; line-height: 1.4;">提示：此網站僅供下單預約，峻廷後續會私訊提供匯款帳號。</p>
     </div>
 
     <main id="main-site">
@@ -94,7 +107,7 @@
                 <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?auto=format&fit=crop&w=600&q=80');"></div>
                 <div class="product-info">
                     <h4>【晨曦森林】手工大豆蠟燭</h4>
-                    <p>NT$ 880</p>
+                    <p class="product-price">NT$ 880</p>
                     <button class="add-to-cart" onclick="addToCart('晨曦森林 蠟燭', 880)">加入購物車</button>
                 </div>
             </div>
@@ -102,8 +115,16 @@
                 <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80');"></div>
                 <div class="product-info">
                     <h4>古樸粗陶．手作圓潤馬克杯</h4>
-                    <p>NT$ 1,200</p>
+                    <p class="product-price">NT$ 1,200</p>
                     <button class="add-to-cart" onclick="addToCart('手作馬克杯', 1200)">加入購物車</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-img" style="background-image: url('https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=600&q=80');"></div>
+                <div class="product-info">
+                    <h4>水洗棉麻．舒眠抱枕套</h4>
+                    <p class="product-price">NT$ 550</p>
+                    <button class="add-to-cart" onclick="addToCart('棉麻抱枕套', 550)">加入購物車</button>
                 </div>
             </div>
         </div>
@@ -111,8 +132,8 @@
 
     <section id="checkout-site">
         <div class="checkout-container">
-            <h4 style="margin-bottom:15px;">訂單確認</h4>
-            <div id="checkoutSummary" style="background:#fafafa; padding:20px; border-radius:8px; margin-bottom:20px;"></div>
+            <h3 style="margin-bottom:20px; color: var(--primary-color);">訂單資料確認</h3>
+            <div id="checkoutSummary" style="background:#fffaf8; padding:20px; border-radius:10px; margin-bottom:20px; border: 1px solid #ffe8e0;"></div>
             <div id="userInfoSection">
                 <input type="text" id="custName" placeholder="收件人姓名 (必填)">
                 <input type="text" id="custPhone" placeholder="收件人電話 (必填)">
@@ -120,14 +141,14 @@
             </div>
             <div class="btn-group">
                 <button class="btn btn-back" onclick="goHome()">回首頁</button>
-                <button class="btn btn-next" onclick="submitOrder()">送出訂單</button>
+                <button class="btn btn-next" onclick="submitOrder()">確認送出訂單</button>
             </div>
         </div>
     </section>
 
     <script>
         let cart = {};
-        // 🛠️ 請填入您的網址
+        // 🛠️ 這裡是您的 Google Script 網址
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJuDaGDneq6QxdEoDjwAtEVxzkylPiA26x9NGl5ASSrdIYXu9b6Y4n2p1s1ZTjJo9BTQ/exec"; 
 
         function toggleCart() { document.getElementById('cartSidebar').classList.toggle('active'); }
@@ -138,7 +159,6 @@
             if(!document.getElementById('cartSidebar').classList.contains('active')) toggleCart();
         }
 
-        // 新增：刪除單一品項的功能
         function deleteItem(name) {
             delete cart[name];
             updateUI();
@@ -160,7 +180,7 @@
             let totalQty = 0;
 
             if(cartKeys.length === 0) {
-                list.innerHTML = `<p style="color:#999; text-align:center; margin-top:20px;">清單目前是空的...</p>`;
+                list.innerHTML = `<p style="color:#999; text-align:center; margin-top:30px;">清單目前是空的...</p>`;
                 btn.style.display = "none";
                 document.getElementById('cartCount').innerText = 0;
             } else {
@@ -173,13 +193,13 @@
                                 <span>${name}</span>
                                 <i class="fa-solid fa-trash-can delete-btn" onclick="deleteItem('${name}')"></i>
                             </div>
-                            <div class="item-info">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div class="qty-controls">
                                     <button class="qty-btn" onclick="updateQty('${name}', -1)">-</button>
-                                    <span>${cart[name].qty}</span>
+                                    <span style="min-width:20px; text-align:center;">${cart[name].qty}</span>
                                     <button class="qty-btn" onclick="updateQty('${name}', 1)">+</button>
                                 </div>
-                                <span>$${cart[name].price * cart[name].qty}</span>
+                                <span style="font-weight:bold; color:var(--accent-color);">$${cart[name].price * cart[name].qty}</span>
                             </div>
                         </div>`;
                 }
@@ -202,16 +222,16 @@
             for (let name in cart) {
                 let subtotal = cart[name].price * cart[name].qty;
                 total += subtotal;
-                html += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${name} x ${cart[name].qty}</span><span>$${subtotal}</span></div>`;
+                html += `<div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span>${name} x ${cart[name].qty}</span><span>$${subtotal}</span></div>`;
             }
-            document.getElementById('checkoutSummary').innerHTML = html + `<hr style="margin:10px 0;"><div style="font-weight:bold; display:flex; justify-content:space-between;"><span>總計</span><span>NT$ ${total}</span></div>`;
+            document.getElementById('checkoutSummary').innerHTML = html + `<hr style="margin:12px 0; border:none; border-top: 1px solid #ffd0c0;"><div style="font-weight:bold; display:flex; justify-content:space-between; font-size:1.2rem; color:var(--primary-color);"><span>總計</span><span>NT$ ${total}</span></div>`;
         }
 
         function submitOrder() {
             const name = document.getElementById('custName').value;
             const phone = document.getElementById('custPhone').value;
             const addr = document.getElementById('custAddr').value;
-            if(!name || !phone) return alert("請填寫姓名與電話。");
+            if(!name || !phone) return alert("請完整填寫姓名與電話。");
 
             let itemsStr = "";
             let total = 0;
@@ -225,7 +245,8 @@
                 mode: "no-cors",
                 body: JSON.stringify({ customerName: name, customerPhone: phone, address: addr, items: itemsStr, totalAmount: total })
             });
-            alert("訂單已預約，感謝您的支持！");
+
+            alert("您的訂單已送出預約！峻廷會儘快與您聯繫確認付款。");
             cart = {};
             goHome();
         }
@@ -238,6 +259,4 @@
         }
     </script>
 </body>
-
 </html>
-
