@@ -63,7 +63,7 @@
         #cartItemsList { flex-grow: 1; overflow-y: auto; padding: 15px 20px; }
         .cart-footer { padding: 20px; border-top: 1px solid #eee; background: #fff; }
 
-        /* 商品網格優化：修正排版跑掉的問題 */
+        /* 商品網格 */
         .product-grid { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
@@ -77,7 +77,6 @@
             border: 1px solid #f0f0f0; 
             display: flex; 
             flex-direction: column;
-            transition: transform 0.2s;
         }
         .product-img { 
             width: 100%; 
@@ -98,14 +97,14 @@
             font-weight: bold;
             margin-bottom: 4px;
             display: -webkit-box;
-            -webkit-line-clamp: 1; /* 限制品名一行 */
+            -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
         .product-desc {
             font-size: 0.75rem;
             color: #888;
-            height: 2.4em; /* 固定兩行描述的高度 */
+            height: 2.4em;
             display: -webkit-box;
             -webkit-line-clamp: 2; 
             -webkit-box-orient: vertical;
@@ -115,19 +114,19 @@
         }
         .product-price { color: var(--primary-color); font-weight: bold; font-size: 1rem; margin-bottom: 8px; }
 
-        .btn-main { width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+        .btn-main { width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
+        .btn-main:active { transform: scale(0.95); opacity: 0.8; }
         .btn-add { padding: 8px; font-size: 0.8rem; margin: 0; }
 
         /* 結帳頁面 */
         #checkout-site { display: none; padding: 20px 5%; }
         .checkout-container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; -webkit-appearance: none; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
 
         .notice-box { margin-top: 12px; padding: 10px; background: #FFF5F5; border: 1px solid #FFE3E3; border-radius: 8px; font-size: 0.75rem; color: #E66767; text-align: center; }
 
         @media (min-width: 768px) {
             .product-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 30px 5%; }
-            .product-name { font-size: 1rem; -webkit-line-clamp: 2; height: 2.8em; }
         }
     </style>
 </head>
@@ -148,7 +147,7 @@
         </div>
         <div id="cartItemsList"></div>
         <div id="cartFooterWrap" class="cart-footer" style="display: none;">
-            <button class="btn-main" onclick="startCheckout()">立即結帳</button>
+            <button class="btn-main" onclick="startCheckout()">立即下單</button>
         </div>
     </div>
 
@@ -158,7 +157,7 @@
             <p style="font-size: 0.9rem; opacity: 0.9;">選物 ・ 溫度 ・ 日常</p>
         </header>
         <div class="product-grid" id="productGrid">
-            <p style="grid-column: 1/-1; text-align: center; padding: 50px; color: #999;">商品載入中...</p>
+            <p style="grid-column: 1/-1; text-align: center; padding: 50px; color: #999;">商品同步中...</p>
         </div>
     </main>
 
@@ -169,64 +168,48 @@
             
             <input type="text" id="custName" placeholder="收件人姓名">
             <input type="tel" id="custPhone" placeholder="收件人電話">
-            <input type="text" id="custLine" placeholder="LINE ID (必填，小編聯絡用)">
-            <input type="text" id="custAddr" placeholder="完整配送地址 / 店到店資訊">
+            <input type="text" id="custLine" placeholder="LINE ID">
+            <input type="text" id="custAddr" placeholder="完整配送地址">
             
             <button class="btn-main" id="submitBtn" onclick="processOrder()">確認送出訂單</button>
             <p onclick="goHome()" style="text-align:center; margin-top:20px; color:#aaa; cursor:pointer; font-size:0.85rem; text-decoration: underline;">回商店繼續逛逛</p>
-            
-            <div class="notice-box">
-                <strong><i class="fa-solid fa-circle-info"></i> 訂購須知：</strong><br>
-                點擊確認後訂單即成立，小編會盡快聯絡您支付與出貨細節。
-            </div>
         </div>
     </section>
 
-    <form id="ecpayForm" method="POST" action="" style="display:none;"></form>
-
     <script>
-        // 設定與 GAS 連動
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMtgajW5rrXPR7DbbNLnwDD_Wfg717BC_f9g3R6Hh5xA2Mlv6MebBOHJgjZHHFZMdp/exec";
-        
-        // 【功能開關】如果您想開啟刷卡跳轉，請將 false 改為 true
-        const useEcPay = false; 
-
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx7UQpiWJpTnDGFsFHxPu_Sltth-hoS-ae3_iOfl8QmTayb3cwXmSETtSm33OPI4okl/exec";
         let cart = {};
 
-        // 1. 取得商品 (對應 品名/價格/描述/圖案)
         async function fetchProducts() {
             try {
                 const res = await fetch(GOOGLE_SCRIPT_URL);
                 const data = await res.json();
                 const grid = document.getElementById('productGrid');
-                
-                if (data.length > 0) {
-                    grid.innerHTML = data.map(p => `
-                        <div class="product-card">
-                            <div class="product-img" style="background-image: url('${p.ImgUrl || ''}')"></div>
-                            <div class="product-info">
-                                <div>
-                                    <div class="product-name">${p.Name}</div>
-                                    <div class="product-desc">${p.Description || ''}</div>
-                                </div>
-                                <div>
-                                    <div class="product-price">NT$ ${p.Price}</div>
-                                    <button class="btn-main btn-add" onclick="addToCart('${p.Name.replace(/'/g, "\\'")}', ${p.Price})">加入購物車</button>
-                                </div>
+                grid.innerHTML = data.map(p => `
+                    <div class="product-card">
+                        <div class="product-img" style="background-image: url('${p.ImgUrl || ''}')"></div>
+                        <div class="product-info">
+                            <div>
+                                <div class="product-name">${p.Name}</div>
+                                <div class="product-desc">${p.Description || ''}</div>
+                            </div>
+                            <div>
+                                <div class="product-price">NT$ ${p.Price}</div>
+                                <button class="btn-main btn-add" onclick="addToCart('${p.Name.replace(/'/g, "\\'")}', ${p.Price})">加入購物車</button>
                             </div>
                         </div>
-                    `).join('');
-                }
+                    </div>
+                `).join('');
             } catch (err) {
-                document.getElementById('productGrid').innerHTML = "<p style='text-align:center; padding:50px;'>暫時無法讀取商品，請檢查網路</p>";
+                console.error("商品載入失敗");
             }
         }
 
-        // 2. 購物車邏輯
+        // 優化 3: 取消自動彈出購物車
         function addToCart(name, price) {
             if (cart[name]) { cart[name].qty++; } else { cart[name] = { price, qty: 1 }; }
             updateUI();
-            if (!document.getElementById('cartSidebar').classList.contains('active')) toggleCart();
+            // 原本這裡有 toggleCart()，現在移除了，點擊後購物車欄位不會自動跳出
         }
 
         function updateQty(name, delta) {
@@ -254,7 +237,7 @@
                         </div>
                     </div>`;
             }
-            list.innerHTML = html || "<p style='text-align:center; padding:30px; color:#ccc;'>購物車是空的</p>";
+            list.innerHTML = html || "<p style='text-align:center; padding:30px; color:#ccc;'>購物清單目前空空的喔</p>";
             document.getElementById('cartCount').innerText = totalQty;
             document.getElementById('cartFooterWrap').style.display = totalQty > 0 ? "block" : "none";
         }
@@ -275,43 +258,39 @@
             window.scrollTo(0,0);
         }
 
-        // 3. 送出訂單處理
         async function processOrder() {
             const name = document.getElementById('custName').value.trim();
             const phone = document.getElementById('custPhone').value.trim();
             const line = document.getElementById('custLine').value.trim();
             const addr = document.getElementById('custAddr').value.trim();
 
-            if (!name || !phone || !line || !addr) return alert("請完整填寫收件與 LINE 聯絡資訊！");
+            if (!name || !phone || !line || !addr) return alert("請完整填寫收件資訊！");
 
             const btn = document.getElementById('submitBtn');
             btn.innerText = "訂單傳送中..."; btn.disabled = true;
 
+            // 優化 1: 在 items 字串後方加上「聯繫本人」提示，讓 LINE 通知顯示正確
+            const itemListStr = Object.keys(cart).map(k => `${k}(x${cart[k].qty})`).join(', ');
+            const finalItemsForGas = itemListStr + " [付款方式：請聯繫本人確認]";
+
             const orderData = {
-                action: useEcPay ? "createPayment" : "submitOnly",
+                action: "submitOnly",
                 customerName: name,
                 customerPhone: phone,
                 customerLine: line,
                 address: addr,
-                items: Object.keys(cart).map(k => `${k}(x${cart[k].qty})`).join(', '),
+                items: finalItemsForGas,
                 totalAmount: Object.values(cart).reduce((s, v) => s + (v.price * v.qty), 0)
             };
 
             try {
-                // 發送到 GAS (後端會同時紀錄到試算表並發送 LINE 通知)
-                // 註：因為 no-cors 限制，我們無法在前端直接讀取 GAS 回傳的 JSON。
-                // 如果要刷卡，GAS 必須回傳一個帶有金流參數的 HTML，或我們改用其他傳輸方式。
-                // 這裡目前設定為「隱藏綠界」，所以直接執行成功通知。
-                
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: "POST",
                     mode: "no-cors", 
                     body: JSON.stringify(orderData)
                 });
 
-                // 如果未來想「啟用」綠界，這裡會需要一個中間頁面處理跳轉
-                // 目前採用您的「隱藏模式」：直接顯示下單完成。
-                alert("訂單已傳送成功！小編會盡快聯絡您。");
+                alert("下單成功！小編會盡快聯絡您支付方式～");
                 cart = {}; updateUI(); goHome();
                 
             } catch (e) {
@@ -321,7 +300,6 @@
             }
         }
 
-        // 初始化
         fetchProducts();
     </script>
 </body>
